@@ -1,63 +1,87 @@
+
+require 'rubygems'
+# $: << '/git/spdy/lib'
+#
 require 'bundler'
 Bundler.require
 
-# $: << '/git/spdy/lib'
-#
-# require 'ffi-rzmq'
-# require 'spdy'
 
 class Worker
   def initialize(opts = {})
     @worker_identity = opts[:identity]
 
     ctx = ZMQ::Context.new(1)
-    @conn = ctx.socket(ZMQ::XREP)
-    @conn.setsockopt(ZMQ::IDENTITY, opts[:identity])
+    @conn = ctx.socket(ZMQ::DEALER)
     @conn.connect(opts[:route])
+    @zlib = SPDY::Zlib.new
 
     @stream_id = nil
     @headers = {}
     @body = ''
 
     @p = SPDY::Parser.new
-    @p.on_headers_complete do |stream, astream, priority, head|
+
+    @p.on_open do |stream, astream, priority|
       @stream_id = stream
-      @headers = head
     end
 
     @p.on_body do |stream, body|
       @body << body
     end
 
+    @p.on_headers do |stream,  head|
+      @headers.merge! head
+    end
+
     @p.on_message_complete do |stream|
       status, head, body = response(@headers, @body)
 
-      synreply = SPDY::Protocol::Control::SynReply.new
+      synreply = SPDY::Protocol::Control::SynReply.new(:zlib_session => @zlib)
       headers = {'status' => status.to_s, 'version' => 'HTTP/1.1'}.merge(head)
       synreply.create(:stream_id => @stream_id, :headers => headers)
 
-      @conn.send_string(@identity, ZMQ::SNDMORE)
-      @conn.send_string(synreply.to_binary_s)
+      send [synreply.to_binary_s]
 
       # Send body & close connection
       resp = SPDY::Protocol::Data::Frame.new
       resp.create(:stream_id => @stream_id, :flags => 1, :data => body)
+      puts resp.to_binary_s.inspect
 
-      @conn.send_string(@identity, ZMQ::SNDMORE)
-      @conn.send_string(resp.to_binary_s)
+      send [resp.to_binary_s]
+      
+      puts "Response away"
     end
+  end
+
+  def send(data_parts)
+    parts = @envelopes + [''] + data_parts
+    puts "sending #{parts.inspect}"
+    @conn.send_strings(parts)
   end
 
   def run
     loop do
-      @identity = @conn.recv_string()
-      delimiter = @conn.recv_string()
+      poller = ZMQ::Poller.new
+      poller.register(@conn, ZMQ::POLLIN)
 
-      head = @conn.recv_string()
-      body = @conn.recv_string()
+      poller.poll(:blocking)
 
-      @p << head
-      @p << body
+      in_envelope = true
+
+      @envelopes = []
+
+      loop do
+        @conn.recv_string(part = '')
+        puts "body part: #{part.inspect}"
+        if in_envelope
+          @envelopes << part
+        else
+
+          @p << part
+        end
+        break unless @conn.more_parts?
+        in_envelope = false if part == ''
+      end
     end
   end
 

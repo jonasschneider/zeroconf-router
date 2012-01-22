@@ -5,7 +5,7 @@ config['identity'] = 'http-spdy-bridge'
 config['router'] = @router
 
 Thread.abort_on_exception = true
-ctx = EM::ZeroMQ::Context.new(1)
+config['ctx'] = EM::ZeroMQ::Context.new(1)
 
 class XREQHandler
 
@@ -13,8 +13,8 @@ class XREQHandler
     @router = router
     @p = SPDY::Parser.new
 
-    @p.on_headers_complete do |stream, astream, priority, head|
-      p [:ZMQ_REPLY, :stream, stream, :headers, head]
+    @p.on_headers do |stream, head|
+      p [:HEADERS, :stream, stream, :headers, head]
 
       status = head.delete('status')
       version = head.delete('version')
@@ -46,12 +46,12 @@ class XREQHandler
 
   def on_readable(socket, messages)
     messages.each do |m|
+      puts "got: #{m.copy_out_string.inspect}"
       @p << m.copy_out_string
     end
   end
 end
 
-handler = XREQHandler.new(@router)
-config['zmq'] = ctx.bind(ZMQ::XREQ, 'tcp://127.0.0.1:8000', handler, :identity => config['identity'])
+config['handler'] = XREQHandler.new(@router)
 
 puts "Bound XREQ handler to port 8000, let the games begin!"

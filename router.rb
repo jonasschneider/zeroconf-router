@@ -15,6 +15,11 @@ class Router < Goliath::API
     if flush
       data = [env['spdy'], data].flatten
       env.logger.info data
+
+      config['zmq'] ||= config['ctx'].connect(ZMQ::DEALER, 'tcp://localhost:5559', config['handler'], :identity => config['identity'])
+
+
+
       sent = env.config['zmq'].send_msg('', *data)
       env.logger.info "Proxying: #{data.size} messages to ZMQ worker, status: #{sent}"
 
@@ -27,8 +32,8 @@ class Router < Goliath::API
 
   def on_headers(env, headers)
     env.logger.info 'received HTTP headers: ' + headers.inspect
-
-    sr = SPDY::Protocol::Control::SynStream.new
+    config['zlib'] ||= SPDY::Zlib.new
+    sr = SPDY::Protocol::Control::SynStream.new({:zlib_session => config['zlib']})
     headers = headers.inject({}) {|h,(k,v)| h[k.downcase] = v; h}
     headers.merge!({
                      'version' => env['HTTP_VERSION'],
@@ -36,14 +41,17 @@ class Router < Goliath::API
                      'url'     => env['REQUEST_URI']
     })
 
+
+
     # assign a unique stream ID and store it
     # in the HTTP > SPDY stream_id routing table
     env['stream_id'] = env.config['stream']
     env.config['router'][env['stream_id']] = env
     env.config['stream'] += 1
 
-    sr.create(:stream_id => env['stream_id'], :headers => headers)
+    sr.create({:stream_id => env['stream_id'], :headers => headers})
     proxy(env, sr.to_binary_s)
+    env.logger.info 'done'
   end
 
   def on_body(env, data)
@@ -75,6 +83,7 @@ class Router < Goliath::API
 
     # don't send any response to client just yet
     [nil, nil, nil]
+    #[200, {}, "Hello World"]
   end
 
 end
