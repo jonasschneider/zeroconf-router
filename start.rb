@@ -19,6 +19,8 @@ INCOMING_HTTP_PORT = 9000
 
 context = ZMQ::Context.new
 
+Thread.abort_on_exception = true
+
 class Broker
   def run(ctx)
     frontend = ctx.socket(ZMQ::ROUTER)

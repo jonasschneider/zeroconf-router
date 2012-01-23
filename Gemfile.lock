@@ -7,10 +7,11 @@ GIT
       ffi (>= 1.0.0)
       ffi-rzmq (~> 0.9.0)
 
-PATH
-  remote: ../ffi-rzmq
+GIT
+  remote: git://github.com/jonasschneider/ffi-rzmq.git
+  revision: eb594d145636f0ae18204cc5a49b541efbf05b08
   specs:
-    ffi-rzmq (0.9.3)
+    ffi-rzmq (0.9.5)
       ffi
 
 PATH
