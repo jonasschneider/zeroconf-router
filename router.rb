@@ -1,5 +1,5 @@
-require 'bundler'
-Bundler.require
+#require 'bundler'
+#Bundler.require
 
 # $: << '/git/spdy/lib'
 # $: << '/git/goliath/lib'
@@ -18,11 +18,8 @@ class Router < Goliath::API
 
       config['zmq'] ||= config['ctx'].connect(ZMQ::DEALER, 'tcp://localhost:5559', config['handler'], :identity => config['identity'])
 
-
-
       sent = env.config['zmq'].send_msg('', *data)
       env.logger.info "Proxying: #{data.size} messages to ZMQ worker, status: #{sent}"
-
     else
       env['spdy'] ||= []
       env['spdy'] << data
@@ -51,7 +48,7 @@ class Router < Goliath::API
 
     sr.create({:stream_id => env['stream_id'], :headers => headers})
     proxy(env, sr.to_binary_s)
-    env.logger.info 'done'
+    config['zlib'].reset
   end
 
   def on_body(env, data)

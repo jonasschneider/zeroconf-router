@@ -1,7 +1,7 @@
 source :rubygems
 
-gem 'goliath', :git => 'git://github.com/postrank-labs/goliath.git'
-gem 'spdy', :git => 'git://github.com/igrigorik/spdy.git'
+gem 'goliath'
+gem 'spdy', :path => '../momentum/spdy'
 gem 'em-zeromq', :git => 'git://github.com/andrewvc/em-zeromq.git'
 
 gem 'ffi-rzmq', :path => '../ffi-rzmq'

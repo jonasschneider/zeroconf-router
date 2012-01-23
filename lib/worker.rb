@@ -1,9 +1,9 @@
 
-require 'rubygems'
+#require 'rubygems'
 # $: << '/git/spdy/lib'
 #
-require 'bundler'
-Bundler.require
+#require 'bundler'
+#Bundler.require
 
 
 class Worker
@@ -72,16 +72,19 @@ class Worker
 
       loop do
         @conn.recv_string(part = '')
-        puts "body part: #{part.inspect}"
+
         if in_envelope
           @envelopes << part
         else
-
+          puts "got part: #{part.inspect}"
           @p << part
         end
-        break unless @conn.more_parts?
+
         in_envelope = false if part == ''
+        break unless @conn.more_parts?
       end
+      @p.reset!
+      @zlib.reset
     end
   end
 

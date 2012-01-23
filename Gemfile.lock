@@ -7,60 +7,49 @@ GIT
       ffi (>= 1.0.0)
       ffi-rzmq (~> 0.9.0)
 
-GIT
-  remote: git://github.com/igrigorik/spdy.git
-  revision: 98f44cab69becb274c6f3b9035ef8e0bd7b2b1b7
-  specs:
-    spdy (0.0.3)
-      bindata
-      ffi-zlib
-
-GIT
-  remote: git://github.com/postrank-labs/goliath.git
-  revision: 9c1e0383bc91c6088986a0f71e063b95f804aba2
-  specs:
-    goliath (0.9.4)
-      async-rack
-      em-synchrony (>= 1.0.0)
-      em-websocket
-      eventmachine (>= 1.0.0.beta.3)
-      http_parser.rb (~> 0.5.3)
-      http_router (~> 0.9.0)
-      log4r
-      multi_json
-      rack (>= 1.2.2)
-      rack-contrib
-      rack-respond_to
-
 PATH
   remote: ../ffi-rzmq
   specs:
     ffi-rzmq (0.9.3)
       ffi
 
+PATH
+  remote: ../momentum/spdy
+  specs:
+    spdy (0.0.3)
+      bindata
+      ffi-zlib
+
 GEM
   remote: http://rubygems.org/
   specs:
-    addressable (2.2.6)
     async-rack (0.5.1)
       rack (~> 1.1)
     bindata (1.4.3)
     em-synchrony (1.0.0)
       eventmachine (>= 1.0.0.beta.1)
-    em-websocket (0.3.6)
-      addressable (>= 2.1.1)
-      eventmachine (>= 0.12.9)
     eventmachine (1.0.0.beta.4)
     ffi (1.0.11)
     ffi-zlib (0.2.0)
       ffi
+    goliath (0.9.4)
+      async-rack
+      em-synchrony (>= 1.0.0)
+      eventmachine (>= 1.0.0.beta.3)
+      http_parser.rb
+      http_router (~> 0.9.0)
+      log4r
+      multi_json
+      rack (>= 1.2.2)
+      rack-contrib
+      rack-respond_to
     http_parser.rb (0.5.3)
     http_router (0.9.7)
       rack (>= 1.0.0)
       url_mount (~> 0.2.1)
     log4r (1.1.10)
     multi_json (1.0.4)
-    rack (1.4.0)
+    rack (1.4.1)
     rack-accept-media-types (0.9)
     rack-contrib (1.1.0)
       rack (>= 0.9.1)
@@ -75,5 +64,5 @@ PLATFORMS
 DEPENDENCIES
   em-zeromq!
   ffi-rzmq!
-  goliath!
+  goliath
   spdy!
