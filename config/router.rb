@@ -46,7 +46,7 @@ class XREQHandler
 
   def on_readable(socket, messages)
     messages.each do |m|
-      puts "got: #{m.copy_out_string.inspect}"
+      #puts "got: #{m.copy_out_string.inspect}"
       @p << m.copy_out_string
     end
   end

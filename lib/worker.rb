@@ -54,7 +54,7 @@ class Worker
 
   def send(data_parts)
     parts = @envelopes + [''] + data_parts
-    puts "sending #{parts.inspect}"
+    #puts "sending #{parts.inspect}"
     @conn.send_strings(parts)
   end
 
@@ -75,7 +75,7 @@ class Worker
         if in_envelope
           @envelopes << part
         else
-          puts "got part: #{part.inspect}"
+          #puts "got part: #{part.inspect}"
           @p << part
         end
 
