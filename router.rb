@@ -29,8 +29,7 @@ class Router < Goliath::API
 
   def on_headers(env, headers)
     env.logger.info 'received HTTP headers: ' + headers.inspect
-    config['zlib'] ||= SPDY::Zlib.new
-    sr = SPDY::Protocol::Control::SynStream.new({:zlib_session => config['zlib']})
+    sr = SPDY::Protocol::Control::SynStream.new
     headers = headers.inject({}) {|h,(k,v)| h[k.downcase] = v; h}
     headers.merge!({
                      'version' => env['HTTP_VERSION'],
@@ -46,9 +45,8 @@ class Router < Goliath::API
     env.config['router'][env['stream_id']] = env
     env.config['stream'] += 1
 
-    sr.create({:stream_id => env['stream_id'], :headers => headers})
+    sr.create({:stream_id => env['stream_id'], :headers => headers, :flags => SPDY::Protocol::FLAG_NOCOMPRESS})
     proxy(env, sr.to_binary_s)
-    config['zlib'].reset
   end
 
   def on_body(env, data)

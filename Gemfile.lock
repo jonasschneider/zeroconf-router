@@ -9,13 +9,16 @@ GIT
 
 GIT
   remote: git://github.com/jonasschneider/ffi-rzmq.git
-  revision: eb594d145636f0ae18204cc5a49b541efbf05b08
+  revision: 92f5779258e4046f10c203186759d427f45d1054
+  branch: zeromq-2.1-compat
   specs:
-    ffi-rzmq (0.9.5)
-      ffi
+    ffi-rzmq (0.9.3)
+      ffi (>= 1.0.9)
 
-PATH
-  remote: ../momentum/spdy
+GIT
+  remote: git://github.com/jonasschneider/spdy.git
+  revision: 141a0086378f769c4b006bd28a97a2725397810c
+  branch: add-nocompress-flag
   specs:
     spdy (0.0.3)
       bindata

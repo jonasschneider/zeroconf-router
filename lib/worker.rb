@@ -13,7 +13,6 @@ class Worker
     ctx = ZMQ::Context.new(1)
     @conn = ctx.socket(ZMQ::DEALER)
     @conn.connect(opts[:route])
-    @zlib = SPDY::Zlib.new
 
     @stream_id = nil
     @headers = {}
@@ -36,9 +35,9 @@ class Worker
     @p.on_message_complete do |stream|
       status, head, body = response(@headers, @body)
 
-      synreply = SPDY::Protocol::Control::SynReply.new(:zlib_session => @zlib)
+      synreply = SPDY::Protocol::Control::SynReply.new
       headers = {'status' => status.to_s, 'version' => 'HTTP/1.1'}.merge(head)
-      synreply.create(:stream_id => @stream_id, :headers => headers)
+      synreply.create(:stream_id => @stream_id, :headers => headers, :flags => SPDY::Protocol::FLAG_NOCOMPRESS)
 
       send [synreply.to_binary_s]
 
@@ -83,8 +82,6 @@ class Worker
         in_envelope = false if part == ''
         break unless @conn.more_parts?
       end
-      @p.reset!
-      @zlib.reset
     end
   end
 
